@@ -1,12 +1,8 @@
 package main;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
-import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 class Trie {
     private TrieNode last;
@@ -54,17 +50,6 @@ class Trie {
     void insert(String word) {
         TrieNode current = root;
 
-//        char[] chars = word.toCharArray();
-////        for (int i = 0; i < chars.length; i++) {
-//////            char parent = i > 0 ? chars[i-1] :
-////            TrieNode finalCurrent = current;
-////            current = current.getChildren().computeIfAbsent(chars[i], (c) -> {
-////                TrieNode node = new TrieNode(c);
-////                node.setParent(finalCurrent);
-////                return node;
-////            });
-////        }
-////
         for (char l : word.toCharArray()) {
             TrieNode finalCurrent1 = current;
             current = current.getChildren().computeIfAbsent(l, c -> {
@@ -121,90 +106,30 @@ class Trie {
         return false;
     }
 
-    public LinkedList<String> positionsPre() {
-        LinkedList<String> lista = new LinkedList<>();
-        LinkedList<String> res = new LinkedList<>();
-        StringBuilder a = new StringBuilder();
-        positionsPreAux(root, lista, a, res, root.parent);
-        return res;
+    public List<String> positionsPre() {
+        return buscaPreFixadaRecursiva(root);
     }
 
-    private void positionsPreAux(TrieNode n, LinkedList<String> lista, StringBuilder builder, List<String> res, TrieNode previous) { // recursao
+    private List<String> buscaPreFixadaRecursiva(TrieNode n) {
         if (n != null) {
+            List<String> list = new LinkedList<>();
+
+            n.getChildren().forEach((key, value) -> {
+                List<String> strings = buscaPreFixadaRecursiva(value);
+                list.addAll(strings);
+            });
+
             if (n.element != null) {
-                lista.add(String.valueOf(n.element));
-            }
-            StringBuilder finalBuilder = extractDataFromParent(n, builder, previous);
-            n.getChildren().forEach((key, value) -> {
-                positionsPreAux(value, lista, finalBuilder, res, n);
-                if (value.isEndOfWord()) {
-                    this.addThingsFromBuilder(lista, finalBuilder);
-                    res.addAll(lista);
-                    res.add("-----------");
-                    lista.clear();
+                List<String> aux = list.stream().map(a -> n.element + a).collect(toList());
+                if (n.isEndOfWord()) {
+                    aux.add(String.valueOf(n.element));
                 }
-            });
-        }
-    }
 
-    private StringBuilder extractDataFromParent(TrieNode n, StringBuilder builder, TrieNode previous) {
-        TrieNode parent = n.parent != null ? n.parent.parent : n;
-        if (parent != null && parent.isEndOfWord()
-                || (
-                builder.length() == 0 && n.parent != null
-        )) {
-            do {
-                if (parent != null) {
-                    parent = parent.getParent();
-                    if (parent != null && parent.element != null) {
-                        builder.append(parent.element);
-                    }
-                }
-            } while (parent != null);
-            builder = builder.reverse();
-        } else {
-            builder = new StringBuilder();
-        }
-        return builder;
-    }
-
-    private void addThingsFromBuilder(LinkedList<String> lista, StringBuilder finalBuilder) {
-        if (finalBuilder.length() > 0) {
-            char[] chars = finalBuilder.toString().toCharArray();
-            for (int i = 0; i < chars.length; i++) {
-                lista.add(i, String.valueOf(chars[i]));
+                return aux;
             }
+            return list;
         }
-    }
 
-    public LinkedList<String> positionsPos() {
-        LinkedList<String> lista = new LinkedList<>();
-        StringBuilder builder = new StringBuilder();
-        positionsPosAux(root, lista, builder);
-        return lista;
-    }
-
-    private void positionsPosAux(TrieNode n, LinkedList<String> lista, StringBuilder builder) {
-        TrieNode parent = n;
-        if (n != null) {
-            if (n.isEndOfWord()) {
-                builder.append(n.element);
-                do {
-                    parent = parent.getParent();
-                    if (parent != null && parent.element != null) {
-                        builder.append(parent.element);
-                    }
-                } while (parent != null);
-            }
-
-            String text = builder.reverse().toString();
-            if (!text.isEmpty()) {
-                lista.add(text);
-            }
-
-            n.getChildren().forEach((key, value) -> {
-                positionsPosAux(value, lista, new StringBuilder());
-            });
-        }
+        return Collections.emptyList();
     }
 }

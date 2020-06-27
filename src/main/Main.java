@@ -1,6 +1,7 @@
 package main;
 
 import java.util.LinkedList;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
@@ -13,7 +14,7 @@ public class Main {
         trie.insert("Boia");
 
         System.out.println("Digite o início da palavra");
-        LinkedList<String> characters = trie.positionsPre();
+        List<String> characters = trie.positionsPre();
 //        trie.positionsPos();
         System.out.println();
     }

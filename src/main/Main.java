@@ -13,12 +13,13 @@ public class Main {
         trie.insert("baiano");
         trie.insert("bola");
         trie.insert("boia");
+        trie.insert("alexia");
+        trie.insert("amor");
+        trie.insert("abelha");
 
         System.out.println("Digite o início da palavra");
         String word = in.next();
         List<String> nodeFromString = trie.findNodeFromString(word);
         nodeFromString.forEach(System.out::println);
-//        trie.positionsPos();
-        System.out.println();
     }
 }

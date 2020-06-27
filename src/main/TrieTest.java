@@ -20,7 +20,7 @@ class TrieTest {
         trie.insert("boia");
 
         // act
-        List<String> result = trie.positionsPre();
+        List<String> result = trie.buscaPreFixada();
 
         // assert
         assertTrue(result.contains("bala"));

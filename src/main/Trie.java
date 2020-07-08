@@ -1,12 +1,22 @@
 package main;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 class Trie {
-    private class TrieNode {
+    private static class TrieNode {
         private final Map<Character, TrieNode> children = new HashMap<>();
         private boolean endOfWord;
+        private Character element;
+
+        public TrieNode(Character element) {
+            this.element = element;
+        }
+
+        public TrieNode() {
+        }
 
         Map<Character, TrieNode> getChildren() {
             return children;
@@ -29,9 +39,8 @@ class Trie {
 
     void insert(String word) {
         TrieNode current = root;
-
         for (char l : word.toCharArray()) {
-            current = current.getChildren().computeIfAbsent(l, c -> new TrieNode());
+            current = current.getChildren().computeIfAbsent(l, TrieNode::new);
         }
         current.setEndOfWord(true);
     }
@@ -52,6 +61,19 @@ class Trie {
             current = node;
         }
         return current.isEndOfWord();
+    }
+
+    private TrieNode findNode(String word) {
+        TrieNode current = root;
+        for (int i = 0; i < word.length(); i++) {
+            char ch = word.charAt(i);
+            TrieNode node = current.getChildren().get(ch);
+            if (node == null) {
+                return null;
+            }
+            current = node;
+        }
+        return current;
     }
 
     boolean isEmpty() {
@@ -78,5 +100,39 @@ class Trie {
             return current.getChildren().isEmpty();
         }
         return false;
+    }
+
+    public List<String> buscaPreFixada() {
+        return buscaPreFixadaRecursiva(root);
+    }
+
+    public List<String> findNodeFromString(String word) {
+        TrieNode node = this.findNode(word);
+        List<String> strings = this.buscaPreFixadaRecursiva(node);
+        String parsed = word.substring(0, word.length() - 1);
+        return strings.stream().map(semiWord -> parsed + semiWord).collect(toList());
+    }
+
+    private List<String> buscaPreFixadaRecursiva(TrieNode n) {
+        if (n != null) {
+            List<String> list = new LinkedList<>();
+
+            n.getChildren().forEach((key, value) -> {
+                List<String> strings = buscaPreFixadaRecursiva(value);
+                list.addAll(strings);
+            });
+
+            if (n.element != null) {
+                List<String> aux = list.stream().map(a -> n.element + a).collect(toList());
+                if (n.isEndOfWord()) {
+                    aux.add(String.valueOf(n.element));
+                }
+
+                return aux;
+            }
+            return list;
+        }
+
+        return Collections.emptyList();
     }
 }
